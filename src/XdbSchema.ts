@@ -2,6 +2,7 @@ import { ITypedef, makeExecutableSchema } from 'graphql-tools';
 import gql from 'graphql-tag';
 import * as mustache from 'mustache';
 import { getSchemaDirectives } from '.';
+import { GraphQLSchema } from 'graphql/type';
 
 const baseSchema = gql`
   directive @xdbEntity on OBJECT
@@ -11,12 +12,17 @@ const baseSchema = gql`
   directive @xdbRefManyToOne on FIELD_DEFINITION
   directive @xdbRefManyToMany on FIELD_DEFINITION
 
+  type Metadata {
+    uuid: String
+    version: Int
+    startSID: Int
+    endSID: Int
+    name: String
+    type: String
+  }
+
   interface Entity {
-    uuid: String!
-    version: Int!
-    startSID: Int!
-    endSID: Int!
-    name: String!
+    metadata: Metadata!
   }
 
   type Query {
@@ -124,9 +130,33 @@ export interface IXdbSchemaInput {
   };
 }
 
+const resolvers = {
+  Entity: {
+    __resolveType(obj: any, context: any, info: any): any {
+      if (obj.metadata && obj.metadata.type) {
+        return obj.metadata.type;
+      }
+      return null;
+    },
+  },
+  Query: {
+    getEntityById: (obj: any, args: any, context: any, info: any) => {
+      return {
+        metadata: {
+          uuid: 'abcd',
+          type: 'Device',
+        },
+        os: 'junos',
+        family: 'srx',
+      };
+    },
+  },
+};
+
 export class XdbSchema {
   private input: IXdbSchemaInput;
-  private sql: string;
+  private sql!: string;
+  private executableSchema!: GraphQLSchema;
 
   public constructor(input: IXdbSchemaInput) {
     this.input = input;
@@ -143,8 +173,9 @@ export class XdbSchema {
 
   public toDbSchema(): string {
     if (this.sql === '') {
-      makeExecutableSchema({
+      this.executableSchema = makeExecutableSchema({
         typeDefs: this.toGraphQLTypeDefs(),
+        resolvers,
         schemaDirectives: getSchemaDirectives(this),
         resolverValidationOptions: {
           requireResolversForResolveType: false,
@@ -153,6 +184,11 @@ export class XdbSchema {
       this.sql = mustache.render(dbSchemaTemplates[StoreType.MYSQL], this.generateTemplateInput());
     }
     return this.sql;
+  }
+
+  public toExecutableSchema(): GraphQLSchema {
+    this.toDbSchema();
+    return this.executableSchema;
   }
 
   private generateTemplateInput(): any {

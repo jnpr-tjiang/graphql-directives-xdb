@@ -28,11 +28,10 @@ describe('testXdbSchema', () => {
   });
   const server = new ApolloServerBase({ schema: xdbSchema.toExecutableSchema() });
 
-  debugger;
   it('getEntityById', async () => {
     const query = gql`
       {
-        getEntityByIdxxx(type: "Device", uuid: "abc") {
+        getEntityById(type: "Device", uuid: "abcd") {
           metadata {
             type
             uuid
@@ -45,15 +44,14 @@ describe('testXdbSchema', () => {
     `;
     const client = createTestClient(server);
     const result = await client.query({ query });
+    console['debug'](result.data);
     expect(result.data).toEqual({
-      data: {
-        getEntityById: {
-          metadata: {
-            type: 'Device',
-            uuid: 'abcd',
-          },
-          os: 'junos',
+      getEntityById: {
+        metadata: {
+          type: 'Device',
+          uuid: 'abcd',
         },
+        os: 'junos',
       },
     });
   });

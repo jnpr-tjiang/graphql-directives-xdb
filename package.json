@@ -51,6 +51,7 @@
   "peerDependencies": {},
   "dependencies": {
     "@types/mustache": "^4.0.1",
+    "@types/node": "^13.9.1",
     "mustache": "^4.0.0"
   },
   "jest": {

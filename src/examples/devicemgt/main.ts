@@ -1,5 +1,5 @@
-import { StoreType, XdbSchema, getSchemaDirectives } from '.';
-import { gql, ApolloServer, makeExecutableSchema } from 'apollo-server';
+import { StoreType, XdbSchema } from '../../index';
+import { gql, ApolloServer } from 'apollo-server';
 const INFO_LEVEL = 'info';
 
 const deviceSchema = gql`

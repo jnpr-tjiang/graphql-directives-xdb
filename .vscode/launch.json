@@ -11,13 +11,14 @@
       "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
       "sourceMaps": true,
       "runtimeArgs": [
-        "-i"
+        "-r",
+        "ts-node/register"
       ],
       "env": {
         "NODE_ENV": "development"
       },
       "outFiles": [
-        "${workspaceRoot}/dist/**/*"
+        "${workspaceRoot}/lib/**/*"
       ],
       "cwd": "${workspaceRoot}"
     }

@@ -43,17 +43,16 @@
     "ts-jest": "^25.2.1",
     "tslint": "^6.0.0",
     "tslint-config-prettier": "^1.18.0",
-    "typescript": "^3.8.2"
+    "typescript": "^3.8.2",
+    "@types/mustache": "^4.0.1",
+    "@types/node": "^13.9.1",
+    "mustache": "^4.0.0",
+    "ts-node": "^8.6.2"
   },
   "files": [
     "lib/**/*"
   ],
   "peerDependencies": {},
-  "dependencies": {
-    "@types/mustache": "^4.0.1",
-    "@types/node": "^13.9.1",
-    "mustache": "^4.0.0"
-  },
   "jest": {
     "testEnvironment": "node"
   }

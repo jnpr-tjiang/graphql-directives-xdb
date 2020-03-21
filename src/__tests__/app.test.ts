@@ -44,7 +44,6 @@ describe('testXdbSchema', () => {
     `;
     const client = createTestClient(server);
     const result = await client.query({ query });
-    console['debug'](result.data);
     expect(result.data).toEqual({
       getEntityById: {
         metadata: {

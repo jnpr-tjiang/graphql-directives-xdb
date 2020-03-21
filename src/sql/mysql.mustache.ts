@@ -70,6 +70,7 @@ CREATE TABLE {{name}} (
   end_sid int unsigned NOT NULL DEFAULT 4294967295,
   name varchar(255) NOT NULL,
   {{#columns}}
+  {{columnDef}}
   {{/columns}}
   PRIMARY KEY (uuid_bin, version),
   UNIQUE (name, version),

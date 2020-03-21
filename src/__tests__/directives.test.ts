@@ -26,6 +26,7 @@ const xdbSchema = new XdbSchema({
 });
 
 const sql = xdbSchema.toDbSchema();
+// console['debug'](sql);
 test('Test db schema generation', () => {
   expect(sql).toContain("CREATE USER 'tong'@'%' IDENTIFIED WITH mysql_native_password by 1234");
   expect(sql).toContain('drop database if exists xdb');

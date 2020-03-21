@@ -4,6 +4,8 @@ import * as mustache from 'mustache';
 import { GraphQLSchema } from 'graphql/type';
 import { mysqlTemplate } from './sql/mysql.mustache';
 import { getSchemaDirectives } from './getSchemaDirectives';
+import { resolvers } from './resolvers';
+import { IDbTable } from './sql/DbTable';
 
 const baseSchema = gql`
   directive @xdbEntity on OBJECT
@@ -53,37 +55,26 @@ export interface IXdbSchemaInput {
   };
 }
 
-const resolvers = {
-  Entity: {
-    __resolveType(obj: any, context: any, info: any): any {
-      if (obj.metadata && obj.metadata.type) {
-        return obj.metadata.type;
-      }
-      return null;
-    },
-  },
-  Query: {
-    getEntityById: (obj: any, args: any, context: any, info: any) => {
-      return {
-        metadata: {
-          uuid: 'abcd',
-          type: 'Device',
-        },
-        os: 'junos',
-        family: 'srx',
-      };
-    },
-  },
-};
-
 export class XdbSchema {
   private input: IXdbSchemaInput;
   private sql!: string;
   private executableSchema!: GraphQLSchema;
+  private dbTables: {
+    [name: string]: IDbTable;
+  };
 
   public constructor(input: IXdbSchemaInput) {
     this.input = input;
     this.sql = '';
+    this.dbTables = {};
+  }
+
+  public addTable(table: IDbTable) {
+    this.dbTables[table.name] = table;
+  }
+
+  public getTable(name: string): IDbTable {
+    return this.dbTables[name];
   }
 
   public getBaseGraphQLSchema(): string {
@@ -104,6 +95,7 @@ export class XdbSchema {
           requireResolversForResolveType: false,
         },
       });
+      // console['debug'](this.generateTemplateInput());
       this.sql = mustache.render(dbSchemaTemplates[StoreType.MYSQL], this.generateTemplateInput());
     }
     return this.sql;
@@ -115,20 +107,17 @@ export class XdbSchema {
   }
 
   private generateTemplateInput(): any {
-    return {
+    const tables = [];
+    for (const key of Object.keys(this.dbTables)) {
+      const table: IDbTable = this.dbTables[key];
+      tables.push(table.toDataView(this.input.dbInfo.dbType));
+    }
+    const retval = {
       dbUser: this.input.dbInfo.dbUser,
       dbPass: this.input.dbInfo.dbPass,
       schemaName: this.input.dbInfo.dbName,
-      tables: [
-        {
-          name: 'Device',
-          columns: [],
-        },
-        {
-          name: 'PhysicalInterface',
-          columns: [],
-        },
-      ],
+      tables,
     };
+    return retval;
   }
 }
